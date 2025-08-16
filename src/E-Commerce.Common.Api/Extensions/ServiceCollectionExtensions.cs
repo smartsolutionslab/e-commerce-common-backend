@@ -28,15 +28,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApiVersioning(this IServiceCollection services)
     {
         services.AddApiVersioning(options =>
-        {
-            options.DefaultApiVersion = new ApiVersion(1, 0);
-            options.AssumeDefaultVersionWhenUnspecified = true;
-            options.ApiVersionReader = ApiVersionReader.Combine(
-                new UrlSegmentApiVersionReader(),
-                new HeaderApiVersionReader("X-Version"));
-        });
-
-        services.AddApiVersioning()
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new UrlSegmentApiVersionReader(),
+                    new HeaderApiVersionReader("X-Version"));
+            })
             .AddApiExplorer(setup =>
             {
                 setup.GroupNameFormat = "'v'VVV";
