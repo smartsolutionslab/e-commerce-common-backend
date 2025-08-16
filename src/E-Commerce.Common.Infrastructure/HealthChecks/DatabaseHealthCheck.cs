@@ -1,3 +1,4 @@
+using E_Commerce.Common.Infrastructure.Messaging;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 

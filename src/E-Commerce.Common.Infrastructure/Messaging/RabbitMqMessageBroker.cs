@@ -51,7 +51,7 @@ public class RabbitMqMessageBroker : IMessageBroker, IDisposable
         await Task.CompletedTask;
     }
 
-    public async Task PublishDomainEventAsync<T>(T domainEvent, CancellationToken cancellationToken = default) where T : IDomainEvent
+    public async Task PublishDomainEventAsync<T>(T domainEvent, CancellationToken cancellationToken = default) where T : class, IDomainEvent
     {
         var routingKey = $"domain.event.{typeof(T).Name.ToLowerInvariant()}";
         await PublishAsync(domainEvent, "domain.events", routingKey, cancellationToken);
