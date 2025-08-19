@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>E-Commerce.Common.Application</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>E-Commerce Platform Team</Authors>
     <Description>CQRS application layer for E-Commerce platform</Description>
   </PropertyGroup>
