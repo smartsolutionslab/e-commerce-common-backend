@@ -1,4 +1,4 @@
-using E_Commerce.Common.Domain.ValueObjects;
+﻿using E_Commerce.Common.Domain.ValueObjects;
 
 namespace E_Commerce.Common.Infrastructure.Services;
 
