@@ -1,6 +1,6 @@
 using E_Commerce.Common.Domain.Primitives;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -8,21 +8,35 @@ using System.Text.Json;
 
 namespace E_Commerce.Common.Infrastructure.Messaging;
 
+public class MessageBrokerConfig
+{
+    public string Host { get; set; } = "localhost";
+    public int Port { get; set; } = 5672;
+    public string Username { get; set; } = "admin";
+    public string Password { get; set; } = "admin123";
+    public string VirtualHost { get; set; } = "/";
+    public string Exchange { get; set; } = "ecommerce.events";
+}
+
 public class RabbitMqMessageBroker : IMessageBroker, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
     private readonly ILogger<RabbitMqMessageBroker> _logger;
+    private readonly MessageBrokerConfig _config;
 
-    public RabbitMqMessageBroker(IConfiguration configuration, ILogger<RabbitMqMessageBroker> logger)
+    public RabbitMqMessageBroker(IOptions<MessageBrokerConfig> config, ILogger<RabbitMqMessageBroker> logger)
     {
+        _config = config.Value;
         _logger = logger;
         
         var factory = new ConnectionFactory()
         {
-            HostName = configuration["MessageBroker:Host"],
-            UserName = configuration["MessageBroker:Username"],
-            Password = configuration["MessageBroker:Password"]
+            HostName = _config.Host,
+            Port = _config.Port,
+            UserName = _config.Username,
+            Password = _config.Password,
+            VirtualHost = _config.VirtualHost
         };
 
         _connection = factory.CreateConnection();
