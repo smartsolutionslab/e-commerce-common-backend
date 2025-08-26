@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>E-Commerce.Common.Api</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>E-Commerce Platform Team</Authors>
     <Description>Minimal API base classes for E-Commerce platform</Description>
   </PropertyGroup>
