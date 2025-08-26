@@ -1,9 +1,10 @@
-using E_Commerce.Common.Domain.Primitives;
-using E_Commerce.Common.Infrastructure.Services;
-using E_Commerce.Common.Infrastructure.Messaging;
-using E_Commerce.Common.Application.Services;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using E_Commerce.Common.Application.Services;
+using E_Commerce.Common.Domain.Primitives;
+using E_Commerce.Common.Infrastructure.Messaging;
+using E_Commerce.Common.Infrastructure.Services;
+
 
 namespace E_Commerce.Common.Infrastructure.Persistence;
 

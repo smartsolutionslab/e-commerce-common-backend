@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\E-Commerce.Common.Domain\E-Commerce.Common.Domain.csproj" />
     <ProjectReference Include="..\E-Commerce.Common.Application\E-Commerce.Common.Application.csproj" />
+    <ProjectReference Include="..\E-Commerce.Common.Messaging\E-Commerce.Common.Messaging.csproj" />
   </ItemGroup>
 
 </Project>
