@@ -1,8 +1,8 @@
-using E_Commerce.Common.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using E_Commerce.Common.Persistence.Services;
 
 namespace E_Commerce.Common.Api.Middleware;
 

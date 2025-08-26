@@ -4,6 +4,6 @@ namespace E_Commerce.Common.Persistence.Services;
 
 public interface ITenantService
 {
-    TenantId? GetCurrentTenant();
+    TenantId TenantId { get; }
     void SetTenant(TenantId tenantId);
 }

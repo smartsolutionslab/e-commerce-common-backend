@@ -1,7 +1,3 @@
-using E_Commerce.Common.Application.Behaviors;
-using E_Commerce.Common.Infrastructure.Services;
-using FluentValidation;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Asp.Versioning;
 using Microsoft.OpenApi.Models;
@@ -10,21 +6,6 @@ namespace E_Commerce.Common.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCommonServices(this IServiceCollection services)
-    {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-        services.AddValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
-        
-        return services;
-    }
-
-    public static IServiceCollection AddMultiTenancy(this IServiceCollection services)
-    {
-        services.AddScoped<ITenantService, TenantService>();
-        return services;
-    }
-
     public static IServiceCollection AddApiVersioning(this IServiceCollection services)
     {
         services.AddApiVersioning(options =>
