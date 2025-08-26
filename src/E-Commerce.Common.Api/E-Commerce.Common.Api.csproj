@@ -6,9 +6,10 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>E-Commerce.Common.Api</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>E-Commerce Platform Team</Authors>
     <Description>Minimal API base classes for E-Commerce platform</Description>
+    <RepositoryUrl>https://github.com/your-org/e-commerce-common-backend</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
-    <PackageReference Include="Asp.Versioning.Http" Version="8.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,8 +5,8 @@ namespace E_Commerce.Common.Domain.Primitives;
 public abstract class Entity<TId> : IEquatable<Entity<TId>>
     where TId : notnull
 {
-    public TId Id { get; protected set; }
-    public TenantId TenantId { get; protected set; }
+    public TId Id { get; protected set; } = default!;
+    public TenantId TenantId { get; protected set; } = null!;
     public DateTime CreatedAt { get; protected set; }
     public DateTime? UpdatedAt { get; protected set; }
 

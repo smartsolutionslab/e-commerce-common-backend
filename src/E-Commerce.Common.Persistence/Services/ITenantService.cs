@@ -1,6 +1,6 @@
 using E_Commerce.Common.Domain.ValueObjects;
 
-namespace E_Commerce.Common.Infrastructure.Services;
+namespace E_Commerce.Common.Persistence.Services;
 
 public interface ITenantService
 {
