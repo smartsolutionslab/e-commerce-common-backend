@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>E_Commerce.Common.Application</RootNamespace>
+    <Version>1.0.4</Version>
+    <RepositoryUrl>https://github.com/your-org/e-commerce-common-backend</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
