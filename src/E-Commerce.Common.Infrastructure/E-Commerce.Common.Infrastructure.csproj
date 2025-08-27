@@ -1,16 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>E_Commerce.Common.Infrastructure</RootNamespace>
-    <Version>1.0.4</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>E-Commerce.Common.Infrastructure</PackageId>
-    <Authors>E-Commerce Platform Team</Authors>
     <Description>Common infrastructure for E-Commerce platform</Description>
-    <RepositoryUrl>https://github.com/your-org/e-commerce-common-backend</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
