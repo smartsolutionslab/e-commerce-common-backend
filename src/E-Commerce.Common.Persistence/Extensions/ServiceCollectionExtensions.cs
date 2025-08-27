@@ -1,4 +1,7 @@
+using E_Commerce.Common.Application.Abstractions;
+using E_Commerce.Common.Persistence.DbContext;
 using E_Commerce.Common.Persistence.Services;
+using E_Commerce.Common.Persistence.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,9 +10,16 @@ namespace E_Commerce.Common.Persistence.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMultiTenancy(this IServiceCollection services)
+    public static IServiceCollection AddCommonPersistence(this IServiceCollection services)
     {
         services.AddScoped<ITenantService, TenantService>();
+        return services;
+    }
+
+    public static IServiceCollection AddUnitOfWork<TDbContext>(this IServiceCollection services)
+        where TDbContext : BaseDbContext
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork<TDbContext>>();
         return services;
     }
 

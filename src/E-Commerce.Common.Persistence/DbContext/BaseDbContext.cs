@@ -39,9 +39,11 @@ public abstract class BaseDbContext : Microsoft.EntityFrameworkCore.DbContext
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var domainEvents = ChangeTracker
-            .Entries<Entity<object>>()
-            .Select(x => x.Entity)
-            .SelectMany(x => x.GetDomainEvents())
+            .Entries()
+            .Where(e => e.Entity is IEntity)
+            .Select(e => e.Entity)
+            .Cast<IEntity>()
+            .SelectMany(entity => entity.GetDomainEvents())
             .ToList();
 
         var result = await base.SaveChangesAsync(cancellationToken);
@@ -52,8 +54,10 @@ public abstract class BaseDbContext : Microsoft.EntityFrameworkCore.DbContext
         }
 
         ChangeTracker
-            .Entries<Entity<object>>()
-            .Select(x => x.Entity)
+            .Entries()
+            .Where(e => e.Entity is IEntity)
+            .Select(e => e.Entity)
+            .Cast<IEntity>()
             .ToList()
             .ForEach(entity => entity.ClearDomainEvents());
 
