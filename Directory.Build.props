@@ -1,0 +1,17 @@
+<Project>
+  
+  <PropertyGroup>
+    <!-- Gemeinsame .NET Version -->
+    <TargetFramework>net9.0</TargetFramework>
+    
+    <!-- Gemeinsame Autor-Information -->
+    <Authors>E-Commerce Platform Team</Authors>
+    
+    <!-- Gemeinsame Repository-URL -->
+    <RepositoryUrl>https://github.com/smartsolutionslab/e-commerce-common-backend</RepositoryUrl>
+    
+    <!-- Gemeinsame Version -->
+    <Version>1.0.5</Version>
+  </PropertyGroup>
+
+</Project>

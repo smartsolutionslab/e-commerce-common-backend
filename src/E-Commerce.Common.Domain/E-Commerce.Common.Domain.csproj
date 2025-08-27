@@ -1,15 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>E-Commerce.Common.Domain</PackageId>
-    <Version>1.0.4</Version>
-    <Authors>E-Commerce Platform Team</Authors>
     <Description>Domain primitives and value objects for E-Commerce platform</Description>
-    <RepositoryUrl>https://github.com/your-org/e-commerce-common-backend</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
