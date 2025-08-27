@@ -2,7 +2,7 @@ using E_Commerce.Common.Domain.ValueObjects;
 
 namespace E_Commerce.Common.Domain.Primitives;
 
-public abstract class Entity<TId> : IEquatable<Entity<TId>>
+public abstract class Entity<TId> : IEntity, IEquatable<Entity<TId>>
     where TId : notnull
 {
     public TId Id { get; protected set; } = default!;
