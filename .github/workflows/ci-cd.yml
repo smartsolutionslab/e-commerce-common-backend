@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci-cd:
-    uses: your-org/e-commerce-shared-pipelines/.github/workflows/dotnet-library.yml@main
+    uses: smartsolutionslab/e-commerce-shared-pipelines/.github/workflows/dotnet-library.yml@main
     with:
       library-name: 'e-commerce-common'
       dotnet-version: '9.0.x'

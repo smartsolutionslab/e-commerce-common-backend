@@ -10,8 +10,8 @@
     <Product>E-Commerce Platform</Product>
     <Copyright>Copyright © Your Company</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/your-org/e-commerce-common-backend</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/your-org/e-commerce-common-backend</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/smartsolutionslab/e-commerce-common-backend</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/smartsolutionslab/e-commerce-common-backend</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
