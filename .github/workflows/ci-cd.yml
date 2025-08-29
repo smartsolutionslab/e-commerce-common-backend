@@ -1,0 +1,20 @@
+name: Common Backend CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci-cd:
+    uses: your-org/e-commerce-shared-pipelines/.github/workflows/dotnet-library.yml@main
+    with:
+      library-name: 'e-commerce-common'
+      dotnet-version: '9.0.x'
+      run-tests: true
+      run-security-scan: true
+      build-configuration: 'Release'
+      publish-nuget: true
+      nuget-source: 'https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json'
+    secrets: inherit
