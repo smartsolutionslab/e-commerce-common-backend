@@ -1,17 +1,18 @@
 <Project>
   
   <PropertyGroup>
-    <!-- Gemeinsame .NET Version -->
-    <TargetFramework>net9.0</TargetFramework>
-    
-    <!-- Gemeinsame Autor-Information -->
+    <TargetFramework>net9.0</TargetFramework>  
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>  
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>E-Commerce Platform Team</Authors>
-    
-    <!-- Gemeinsame Repository-URL -->
-    <RepositoryUrl>https://github.com/smartsolutionslab/e-commerce-common-backend</RepositoryUrl>
-    
-    <!-- Gemeinsame Version -->
-    <Version>1.0.5</Version>
+    <Product>E-Commerce Platform</Product>
+    <Copyright>Copyright © Your Company</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/your-org/e-commerce-common-backend</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/your-org/e-commerce-common-backend</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
 </Project>
