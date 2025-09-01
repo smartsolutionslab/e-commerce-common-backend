@@ -1,4 +1,5 @@
 ﻿using E_Commerce.Common.Domain.ValueObjects;
+using E_Commerce.Common.Infrastructure.MultiTenancy;
 
 namespace E_Commerce.Common.Persistence.Services;
 

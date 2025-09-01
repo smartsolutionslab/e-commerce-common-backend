@@ -1,4 +1,5 @@
 using E_Commerce.Common.Application.Abstractions;
+using E_Commerce.Common.Infrastructure.MultiTenancy;
 using E_Commerce.Common.Persistence.DbContext;
 using E_Commerce.Common.Persistence.Services;
 using E_Commerce.Common.Persistence.UnitOfWork;
@@ -10,7 +11,7 @@ namespace E_Commerce.Common.Persistence.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCommonPersistence(this IServiceCollection services)
+    public static IServiceCollection AddMultiTenancy(this IServiceCollection services)
     {
         services.AddScoped<ITenantService, TenantService>();
         return services;

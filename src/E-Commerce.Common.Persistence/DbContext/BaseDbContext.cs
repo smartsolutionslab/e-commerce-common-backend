@@ -2,25 +2,16 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using E_Commerce.Common.Domain.Primitives;
 using E_Commerce.Common.Application.Services;
-using E_Commerce.Common.Messaging.Abstractions;
-using E_Commerce.Common.Persistence.Services;
+using E_Commerce.Common.Infrastructure.MultiTenancy;
 
 namespace E_Commerce.Common.Persistence.DbContext;
 
-public abstract class BaseDbContext : Microsoft.EntityFrameworkCore.DbContext
+public abstract class BaseDbContext(
+    DbContextOptions options,
+    ITenantService tenantService,
+    IDomainEventPublisher domainEventPublisher)
+    : Microsoft.EntityFrameworkCore.DbContext(options)
 {
-    private readonly ITenantService _tenantService;
-    private readonly IDomainEventPublisher _domainEventPublisher;
-    private readonly IMessageBroker _messageBroker;
-
-    protected BaseDbContext(DbContextOptions options, ITenantService tenantService, IDomainEventPublisher domainEventPublisher, IMessageBroker messageBroker) 
-        : base(options)
-    {
-        _tenantService = tenantService;
-        _domainEventPublisher = domainEventPublisher;
-        _messageBroker = messageBroker;
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Apply tenant filter to all entities
@@ -50,7 +41,7 @@ public abstract class BaseDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         foreach (var domainEvent in domainEvents)
         {
-            await _domainEventPublisher.PublishAsync(domainEvent, cancellationToken);
+            await domainEventPublisher.PublishAsync(domainEvent, cancellationToken);
         }
 
         ChangeTracker
@@ -69,7 +60,7 @@ public abstract class BaseDbContext : Microsoft.EntityFrameworkCore.DbContext
         var parameter = Expression.Parameter(entityType, "e");
         var tenantProperty = Expression.Property(parameter, nameof(Entity<object>.TenantId));
         var tenantValue = Expression.Property(
-            Expression.Constant(_tenantService), 
+            Expression.Constant(tenantService), 
             nameof(ITenantService.TenantId));
         
         var equal = Expression.Equal(tenantProperty, tenantValue);

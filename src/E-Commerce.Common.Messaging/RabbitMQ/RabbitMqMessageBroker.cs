@@ -1,101 +1,230 @@
+using System.Text;
+using System.Text.Json;
 using E_Commerce.Common.Domain.Primitives;
-using E_Commerce.Common.Messaging.Abstractions;
+using E_Commerce.Common.Infrastructure.Messaging;
 using E_Commerce.Common.Messaging.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
 
 namespace E_Commerce.Common.Messaging.RabbitMQ;
 
-public class RabbitMqMessageBroker : IMessageBroker, IDisposable
+public class RabbitMqMessageBroker(IOptions<MessageBrokerConfig> options, ILogger<RabbitMqMessageBroker> logger)
+    : IMessageBroker, IAsyncDisposable
 {
-    private readonly IConnection _connection;
-    private readonly IModel _channel;
-    private readonly ILogger<RabbitMqMessageBroker> _logger;
-    private readonly MessageBrokerConfig _config;
+    private readonly MessageBrokerConfig _options = options.Value;
+    private IConnection? _connection;
+    private IChannel? _channel;
+    private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
-    public RabbitMqMessageBroker(IOptions<MessageBrokerConfig> config, ILogger<RabbitMqMessageBroker> logger)
+    public async Task InitializeAsync()
     {
-        _config = config.Value;
-        _logger = logger;
-        
-        var factory = new ConnectionFactory()
+        await _connectionLock.WaitAsync();
+        try
         {
-            HostName = _config.Host,
-            Port = _config.Port,
-            UserName = _config.Username,
-            Password = _config.Password,
-            VirtualHost = _config.VirtualHost
-        };
+            if (_connection is not null)
+                return;
 
-        _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
+            var factory = new ConnectionFactory
+            {
+                HostName = _options.Host,
+                Port = _options.Port,
+                UserName = _options.Host,
+                Password = _options.Password,
+                VirtualHost = _options.VirtualHost,
+                AutomaticRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
+            };
 
-        // Declare exchanges
-        _channel.ExchangeDeclare("domain.events", ExchangeType.Topic, true);
-        _channel.ExchangeDeclare("integration.events", ExchangeType.Topic, true);
+            _connection = await factory.CreateConnectionAsync();
+            _channel = await _connection.CreateChannelAsync();
+
+            // Exchange deklarieren
+            await _channel.ExchangeDeclareAsync(
+                exchange: _options.Exchange,
+                type: ExchangeType.Topic,
+                durable: true);
+
+            logger.LogInformation("RabbitMQ connection established to {HostName}:{Port}", 
+                _options.Host, _options.Port);
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
     }
 
-    public async Task PublishAsync<T>(T message, string exchange, string routingKey, CancellationToken cancellationToken = default) where T : class
+    public async Task PublishAsync<T>(T message, string routingKey, CancellationToken cancellationToken = default) 
+        where T : class
     {
-        var json = JsonSerializer.Serialize(message);
+        await EnsureInitializedAsync();
+
+        var json = JsonSerializer.Serialize(message, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+        
         var body = Encoding.UTF8.GetBytes(json);
 
-        var properties = _channel.CreateBasicProperties();
-        properties.Persistent = true;
-        properties.MessageId = Guid.NewGuid().ToString();
-        properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        var properties = new BasicProperties
+        {
+            Persistent = true,
+            MessageId = Guid.NewGuid().ToString(),
+            Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
+            ContentType = "application/json",
+            Type = typeof(T).Name
+        };
 
-        _channel.BasicPublish(exchange, routingKey, properties, body);
+        await _channel!.BasicPublishAsync(
+            exchange: _options.Exchange,
+            routingKey: routingKey,
+            mandatory: true,
+            basicProperties: properties,
+            body: body,
+            cancellationToken: cancellationToken);
+
+        logger.LogDebug("Published message {MessageType} with routing key {RoutingKey}", 
+            typeof(T).Name, routingKey);
+    }
+
+    public async Task PublishDomainEventAsync<T>(T domainEvent, CancellationToken cancellationToken = default) 
+        where T : class, IDomainEvent
+    {
+        await EnsureInitializedAsync();
+
+        var eventName = typeof(T).Name;
+        var routingKey = $"events.{eventName.ToLowerInvariant()}";
+
+        var json = JsonSerializer.Serialize(domainEvent, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
         
-        _logger.LogInformation("Published message {MessageType} to {Exchange}/{RoutingKey}", 
-            typeof(T).Name, exchange, routingKey);
+        var body = Encoding.UTF8.GetBytes(json);
 
-        await Task.CompletedTask;
+        var properties = new BasicProperties
+        {
+            Persistent = true,
+            MessageId = Guid.NewGuid().ToString(),
+            Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
+            ContentType = "application/json",
+            Type = eventName,
+            Headers = new Dictionary<string, object>
+            {
+                ["EventType"] = eventName,
+                ["OccurredAt"] = domainEvent.OccurredOn.ToString("O")
+            }!
+        };
+
+        await _channel!.BasicPublishAsync(
+            exchange: _options.Exchange,
+            routingKey: routingKey,
+            mandatory: true,
+            basicProperties: properties,
+            body: body,
+            cancellationToken: cancellationToken);
+
+        logger.LogDebug("Published domain event {EventType} with routing key {RoutingKey}", 
+            eventName, routingKey);
     }
 
-    public async Task PublishDomainEventAsync<T>(T domainEvent, CancellationToken cancellationToken = default) where T : class, IDomainEvent
+    public async Task SubscribeAsync<T>(string queueName, Func<T, CancellationToken, Task> handler, 
+        CancellationToken cancellationToken = default) where T : class
     {
-        var routingKey = $"domain.event.{typeof(T).Name.ToLowerInvariant()}";
-        await PublishAsync(domainEvent, "domain.events", routingKey, cancellationToken);
-    }
+        await EnsureInitializedAsync();
 
-    public async Task SubscribeAsync<T>(string queueName, Func<T, Task> handler, CancellationToken cancellationToken = default) where T : class
-    {
-        _channel.QueueDeclare(queueName, true, false, false);
+        // Queue deklarieren
+        await _channel!.QueueDeclareAsync(
+            queue: queueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null,
+            cancellationToken: cancellationToken);
 
-        var consumer = new EventingBasicConsumer(_channel);
-        consumer.Received += async (model, ea) =>
+        // Queue an Exchange binden
+        await _channel.QueueBindAsync(
+            queue: queueName,
+            exchange: _options.Exchange,
+            routingKey: queueName,
+            arguments: null,
+            cancellationToken: cancellationToken);
+
+        // QoS für bessere Lastverteilung
+        await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
+
+        var consumer = new AsyncEventingBasicConsumer(_channel);
+        consumer.ReceivedAsync += async (model, ea) =>
         {
             try
             {
-                var body = ea.Body.ToArray();
-                var json = Encoding.UTF8.GetString(body);
-                var message = JsonSerializer.Deserialize<T>(json);
-
-                if (message != null)
+                var json = Encoding.UTF8.GetString(ea.Body.ToArray());
+                var message = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
                 {
-                    await handler(message);
-                    _channel.BasicAck(ea.DeliveryTag, false);
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+                
+                if (message is not null)
+                {
+                    await handler(message, cancellationToken);
+                    await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false, cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    logger.LogWarning("Failed to deserialize message to {MessageType}", typeof(T).Name);
+                    await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, cancellationToken: cancellationToken);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing message from queue {QueueName}", queueName);
-                _channel.BasicNack(ea.DeliveryTag, false, false);
+                logger.LogError(ex, "Error processing message {MessageType} from queue {QueueName}", 
+                    typeof(T).Name, queueName);
+                
+                await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
         };
 
-        _channel.BasicConsume(queueName, false, consumer);
-        await Task.CompletedTask;
+        await _channel.BasicConsumeAsync(
+            queue: queueName, 
+            autoAck: false, 
+            consumer: consumer,
+            cancellationToken: cancellationToken);
+
+        logger.LogInformation("Started consuming messages from queue {QueueName}", queueName);
     }
 
-    public void Dispose()
+    private async Task EnsureInitializedAsync()
     {
-        _channel?.Dispose();
-        _connection?.Dispose();
+        if (_connection is null || _channel is null)
+        {
+            await InitializeAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_channel is not null)
+            {
+                await _channel.CloseAsync();
+                await _channel.DisposeAsync();
+            }
+
+            if (_connection is not null)
+            {
+                await _connection.CloseAsync();
+                _connection.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error disposing RabbitMQ connection");
+        }
+        finally
+        {
+            _connectionLock.Dispose();
+        }
     }
 }
