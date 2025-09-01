@@ -2,15 +2,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace E_Commerce.Common.Api.Middleware;
 
-public class SecurityHeadersMiddleware
+public class SecurityHeadersMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public SecurityHeadersMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         // Remove server information
@@ -25,6 +18,6 @@ public class SecurityHeadersMiddleware
         context.Response.Headers.Append("Content-Security-Policy", 
             "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'");
 
-        await _next(context);
+        await next(context);
     }
 }

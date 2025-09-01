@@ -1,16 +1,11 @@
-﻿using E_Commerce.Common.Messaging.Abstractions;
+﻿using E_Commerce.Common.Infrastructure.Messaging;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace E_Commerce.Common.Messaging.HealthChecks;
 
-public class MessageBrokerHealthCheck : IHealthCheck
+public class MessageBrokerHealthCheck(IMessageBroker messageBroker) : IHealthCheck
 {
-    private readonly IMessageBroker _messageBroker;
-
-    public MessageBrokerHealthCheck(IMessageBroker messageBroker)
-    {
-        _messageBroker = messageBroker;
-    }
+    private readonly IMessageBroker _messageBroker = messageBroker;
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
